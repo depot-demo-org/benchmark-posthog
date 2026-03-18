@@ -38,27 +38,21 @@ jobs:
         run: |
           UV_PROJECT_ENVIRONMENT=$pythonLocation uv sync --frozen --dev
 
-      - name: ruff check
-        run: ruff check .
-
-      - name: ruff format check
-        run: ruff format --check --diff .
-
-      - name: ty check
-        continue-on-error: true
-        run: |
-          ./bin/ty.py check posthog ee common dags || true
-
-      - name: mypy
-        shell: bash -e {0}
-        run: |
-          mypy --version && mypy --cache-fine-grained . | mypy-baseline filter --allow-unsynced || (echo "run 'pnpm run mypy-baseline-sync' to update the baseline" && exit 1)
-
-      - name: Check hogli manifest
-        run: ./bin/hogli meta:check
-
-      - name: Run hogli tests
-        run: pytest common/hogli/tests/ -v
-
-      - name: Run dependency detection tests
-        run: pytest bin/test/test_find_python_dependencies.py -v
+      - parallel:
+          - name: ruff check
+            run: ruff check .
+          - name: ruff format check
+            run: ruff format --check --diff .
+          - name: ty check
+            continue-on-error: true
+            run: ./bin/ty.py check posthog ee common dags
+          - name: mypy
+            shell: bash -e {0}
+            run: |
+              mypy --version && mypy --cache-fine-grained . | mypy-baseline filter --allow-unsynced || (echo "run 'pnpm run mypy-baseline-sync' to update the baseline" && exit 1)
+          - name: Check hogli manifest
+            run: ./bin/hogli meta:check
+          - name: Run hogli tests
+            run: pytest common/hogli/tests/ -v
+          - name: Run dependency detection tests
+            run: pytest bin/test/test_find_python_dependencies.py -v
