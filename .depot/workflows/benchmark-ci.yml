@@ -20,6 +20,26 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: 3.12.12
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
+        with:
+          enable-cache: true
+          version: 0.10.2
+
+      - name: Install SAML dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libxml2-dev libxmlsec1 libxmlsec1-dev libxmlsec1-openssl
+
+      - name: Install Python dependencies
+        run: |
+          UV_PROJECT_ENVIRONMENT=$pythonLocation uv sync --frozen --dev
+
       - parallel:
           - name: ruff check
             run: ruff check .
