@@ -11,7 +11,7 @@ defaults:
 jobs:
   benchmark-gha:
     name: benchmark gha
-    runs-on: ubuntu-22.04-4
+    runs-on: ubuntu-latest-4
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
@@ -65,7 +65,7 @@ jobs:
 
   benchmark-depot-ghr:
     name: benchmark depot ghr
-    runs-on: depot-ubuntu-22.04-4
+    runs-on: depot-ubuntu-latest-4
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
