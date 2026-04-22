@@ -27,19 +27,33 @@ jobs:
           python-version: 3.12.12
 
       - name: Install uv
+        id: setup-uv
         uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
         with:
           enable-cache: true
           version: 0.10.2
 
+      - name: Check uv and Python version compatibility
+        shell: bash
+        run: |
+          python3 bin/check_uv_python_compatibility.py
+
       - name: Install SAML dependencies
+        if: steps.setup-uv.outputs.cache-hit != 'true'
+        shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install libxml2-dev libxmlsec1 libxmlsec1-dev libxmlsec1-openssl
 
       - name: Install Python dependencies
+        shell: bash
         run: |
           UV_PROJECT_ENVIRONMENT=$pythonLocation uv sync --frozen --dev
+
+      - name: Download GeoIP database
+        shell: bash
+        run: |
+          ./bin/download-mmdb
 
       - parallel:
           - name: ruff check
@@ -47,15 +61,23 @@ jobs:
           - name: ruff format check
             run: ruff format --check --diff .
           - name: ty check
-            continue-on-error: true
-            run: ./bin/ty.py check posthog ee common dags
+            shell: bash
+            run: |
+              echo "Feedback welcome in #team-devex"
+              uv run ty check
           - name: mypy
             shell: bash -e {0}
             run: |
-              mypy --version && mypy --cache-fine-grained . | mypy-baseline filter --allow-unsynced || (echo "run 'pnpm run mypy-baseline-sync' to update the baseline" && exit 1)
-          - name: Check hogli manifest
+              mypy --version && mypy --cache-fine-grained .
+          - name: Check if schema.py is up to date
+            shell: bash
+            run: |
+              npm run schema:build:python && git diff --exit-code
+          - name: Check hogli manifest completeness
             run: ./bin/hogli meta:check
           - name: Run hogli tests
-            run: pytest common/hogli/tests/ -v
-          - name: Run dependency detection tests
-            run: pytest bin/test/test_find_python_dependencies.py -v
+            shell: bash
+            run: pytest common/hogli/tests/ -v --cov=common/hogli --cov-report=term --junitxml=junit-hogli.xml
+          - name: Run dependency detection script tests
+            shell: bash
+            run: pytest bin/test/test_find_python_dependencies.py -v --junitxml=junit-dependency-detection.xml
