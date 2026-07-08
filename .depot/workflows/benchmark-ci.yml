@@ -108,7 +108,3 @@ jobs:
           - name: Run dependency detection script tests
             shell: bash
             run: pytest bin/test/test_find_python_dependencies.py -v --junitxml=junit-dependency-detection.xml
-
-      - name: Keep executor alive on failure
-        if: failure()
-        run: sleep 120
