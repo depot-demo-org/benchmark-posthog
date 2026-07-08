@@ -19,19 +19,6 @@ jobs:
         max-age: 2h
     timeout-minutes: 30
     steps:
-      - name: Log environment before checkout
-        working-directory: .
-        shell: bash
-        run: |
-          echo "PATH=$PATH"
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}"
-          echo "pythonLocation=${pythonLocation:-}"
-          echo "Python_ROOT_DIR=${Python_ROOT_DIR:-}"
-          echo "RUNNER_TOOL_CACHE=${RUNNER_TOOL_CACHE:-}"
-          echo "AGENT_TOOLSDIRECTORY=${AGENT_TOOLSDIRECTORY:-}"
-          command -v python3 || true
-          python3 --version || true
-
       - uses: actions/checkout@v6
         with:
           submodules: recursive
@@ -41,19 +28,6 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: 3.13.13
-
-      - name: Log environment after setup-python
-        shell: bash
-        run: |
-          echo "PATH=$PATH"
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}"
-          echo "pythonLocation=${pythonLocation:-}"
-          echo "Python_ROOT_DIR=${Python_ROOT_DIR:-}"
-          echo "RUNNER_TOOL_CACHE=${RUNNER_TOOL_CACHE:-}"
-          echo "AGENT_TOOLSDIRECTORY=${AGENT_TOOLSDIRECTORY:-}"
-          command -v python3 || true
-          python3 --version || true
-          ldd "$(command -v python3)" || true
 
       - name: Install uv
         id: setup-uv
@@ -84,21 +58,6 @@ jobs:
         run: |
           UV_PROJECT_ENVIRONMENT=$pythonLocation uv sync --frozen --dev
 
-      - name: Log environment before snapshot capture
-        shell: bash
-        run: |
-          echo "PATH=$PATH"
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}"
-          echo "pythonLocation=${pythonLocation:-}"
-          echo "Python_ROOT_DIR=${Python_ROOT_DIR:-}"
-          echo "RUNNER_TOOL_CACHE=${RUNNER_TOOL_CACHE:-}"
-          echo "AGENT_TOOLSDIRECTORY=${AGENT_TOOLSDIRECTORY:-}"
-          command -v python3 || true
-          python3 --version || true
-          command -v pytest || true
-          pytest --version || true
-          ldd "$(command -v python3)" || true
-
   benchmark:
     name: benchmark
     needs: setup
@@ -106,40 +65,13 @@ jobs:
       size: 4x16
       image: posthog-benchmark-ci
     timeout-minutes: 30
+    env:
+      LD_LIBRARY_PATH: /home/runner/work/tmp/tool_cache/Python/3.13.13/x64/lib:${{ env.LD_LIBRARY_PATH }}
     steps:
-      - name: Log environment before checkout
-        working-directory: .
-        shell: bash
-        run: |
-          echo "PATH=$PATH"
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}"
-          echo "pythonLocation=${pythonLocation:-}"
-          echo "Python_ROOT_DIR=${Python_ROOT_DIR:-}"
-          echo "RUNNER_TOOL_CACHE=${RUNNER_TOOL_CACHE:-}"
-          echo "AGENT_TOOLSDIRECTORY=${AGENT_TOOLSDIRECTORY:-}"
-          command -v python3 || true
-          python3 --version || true
-          command -v pytest || true
-          ldd "$(command -v python3)" || true
-
       - uses: actions/checkout@v6
         with:
           submodules: recursive
           clean: false
-
-      - name: Log environment after checkout
-        shell: bash
-        run: |
-          echo "PATH=$PATH"
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}"
-          echo "pythonLocation=${pythonLocation:-}"
-          echo "Python_ROOT_DIR=${Python_ROOT_DIR:-}"
-          echo "RUNNER_TOOL_CACHE=${RUNNER_TOOL_CACHE:-}"
-          echo "AGENT_TOOLSDIRECTORY=${AGENT_TOOLSDIRECTORY:-}"
-          command -v python3 || true
-          python3 --version || true
-          command -v pytest || true
-          ldd "$(command -v python3)" || true
 
       - parallel:
           - name: ruff check
