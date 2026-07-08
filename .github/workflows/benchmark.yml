@@ -22,7 +22,7 @@ jobs:
       - uses: docker/setup-qemu-action@v2
       - uses: docker/build-push-action@v3
         with:
-          context: https://github.com/PostHog/posthog.git#${{ steps.upstream.outputs.sha }}
+          context: upstream
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -42,7 +42,7 @@ jobs:
       - uses: depot/setup-action@v1
       - uses: depot/build-push-action@v1
         with:
-          context: https://github.com/PostHog/posthog.git#${{ steps.upstream.outputs.sha }}
+          context: upstream
           platforms: linux/amd64,linux/arm64
           project: tgh7615cwk
           build-args: |
