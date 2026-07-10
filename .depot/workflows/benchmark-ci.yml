@@ -11,6 +11,7 @@ defaults:
 jobs:
   benchmark:
     name: benchmark
+    runs-on: depot-ubuntu-24.04-8
     timeout-minutes: 30
     env:
       LD_LIBRARY_PATH: /home/runner/work/tmp/tool_cache/Python/3.13.13/x64/lib:${{ env.LD_LIBRARY_PATH }}
