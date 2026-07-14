@@ -60,6 +60,7 @@ jobs:
     needs: setup
     runs-on:
       image: phb-base
+      size: 8x32
     timeout-minutes: 12
     env:
       LD_LIBRARY_PATH: /home/runner/work/tmp/tool_cache/Python/3.13.13/x64/lib:${{ env.LD_LIBRARY_PATH }}
