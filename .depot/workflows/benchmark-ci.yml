@@ -9,12 +9,12 @@ defaults:
     working-directory: upstream
 
 jobs:
-  benchmark:
-    name: benchmark
-    runs-on: depot-ubuntu-24.04-8
-    timeout-minutes: 12
-    env:
-      LD_LIBRARY_PATH: /home/runner/work/tmp/tool_cache/Python/3.13.13/x64/lib:${{ env.LD_LIBRARY_PATH }}
+  setup:
+    snapshot:
+      image-name: phb-base
+      version: v1
+      with:
+        version: v1.2.24-alpha.0
     steps:
       - uses: actions/checkout@v6
         with:
@@ -55,6 +55,19 @@ jobs:
         run: |
           UV_PROJECT_ENVIRONMENT=$pythonLocation uv sync --frozen --dev
 
+  benchmark:
+    name: benchmark
+    needs: setup
+    runs-on:
+      image: phb-base
+    timeout-minutes: 12
+    env:
+      LD_LIBRARY_PATH: /home/runner/work/tmp/tool_cache/Python/3.13.13/x64/lib:${{ env.LD_LIBRARY_PATH }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          clean: false
       - parallel:
           - name: ruff check
             run: ruff check .
