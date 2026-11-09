@@ -69,6 +69,9 @@ jobs:
         with:
           submodules: recursive
           clean: false
+      - name: Install Python dependencies
+        shell: bash
+        run: uv sync --frozen --dev
       - parallel:
           - name: ruff check
             run: ruff check .
@@ -84,7 +87,7 @@ jobs:
             env:
               MYPY_NUM_WORKERS: 2
             run: |
-              mypy --version && mypy --cache-fine-grained --disable-error-code unused-ignore .
+              uv run mypy --version && uv run mypy --cache-fine-grained --disable-error-code unused-ignore .
           - name: Check if schema.py is up to date
             shell: bash
             run: |
@@ -93,16 +96,16 @@ jobs:
             run: ./bin/hogli meta:check
           - name: Run hogli framework tests
             shell: bash
-            run: pytest tools/hogli/tests -v --junitxml=junit-hogli.xml
+            run: uv run pytest tools/hogli/tests -v --junitxml=junit-hogli.xml
           - name: Run hogli extension tests
             shell: bash
-            run: pytest tools/hogli-commands/hogli_commands/tests -v --junitxml=junit-hogli-commands.xml
+            run: uv run pytest tools/hogli-commands/hogli_commands/tests -v --junitxml=junit-hogli-commands.xml
           - name: Run query-performance-ai tests
             shell: bash
-            run: pytest tools/query-performance-ai/query_performance_ai -v --junitxml=junit-query-performance-ai.xml
+            run: uv run pytest tools/query-performance-ai/query_performance_ai -v --junitxml=junit-query-performance-ai.xml
           - name: Run pr-approval-agent (stamphog) tests
             shell: bash
-            run: pytest tools/pr-approval-agent -v --junitxml=junit-pr-approval-agent.xml
+            run: uv run pytest tools/pr-approval-agent -v --junitxml=junit-pr-approval-agent.xml
           - name: Run dependency detection script tests
             shell: bash
-            run: pytest bin/test/test_find_python_dependencies.py -v --junitxml=junit-dependency-detection.xml
+            run: uv run pytest bin/test/test_find_python_dependencies.py -v --junitxml=junit-dependency-detection.xml
